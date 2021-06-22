@@ -4,9 +4,10 @@ from getpass import getpass
 
 userList = []
 
-userList.append({"userID": "00123", "userPin": "1234", "userBalance": "5000", "overdraft": True})
-userList.append({"userID": "00234", "userPin": "2345", "userBalance": "499" , "overdraft": False})
-userList.append({"userID": "00345", "userPin": "3456", "userBalance": "25", "overdraft": True})
+userList.append({"userID": "00123", "userPin": "1234", "userBalance": 5000, "overdraft": True})
+userList.append({"userID": "00234", "userPin": "2345", "userBalance": 499 , "overdraft": False})
+userList.append({"userID": "00345", "userPin": "3456", "userBalance": 25, "overdraft": True})
+
 
 
 def loginOrRegister():
@@ -45,16 +46,19 @@ def login():
 
 
 def registerUser():
+    
     print("Please input User ID and User Pin to register.")
     userId = input("User ID: ") 
     for user in userList:
         if user["userID"] == userId:
-            print("User ID already exists. Please use a different one")   
-                
+            print("User ID already exists. Please use a different one \n")   
+      
     userPin = input("User Pin: ")
-    userList.append({'userID': userId, 'userPin': userPin, 'userBalance': "0"})
+    userList.append({'userID': userId, 'userPin': userPin, 'userBalance': 0})
     
-    print("Registration Succesful! Please login into your account.")
+    print("Registration Succesful! Please login into your account.\n")
+    input("Return to continue...")
+    
     login()
     
     
@@ -91,27 +95,65 @@ def showMenu(currentUser):
 
 def menuSelection(choice, currentUser):
     if (choice == 1):
-        print("You have selected Deposit.\n")
+        deposit(currentUser)
         input("Return to continue...")
+        showMenu(currentUser)
     elif(choice == 2):
-        print("You have selected Withdraw.\n")
+        withdraw(currentUser)
         input("Return to continue...")
+        showMenu(currentUser)
     elif(choice == 3):
         displayStatement(currentUser)
         input("Return to continue...")
+        showMenu(currentUser)
     elif(choice == 4):
-        print("You selected Change Pin\n")
+        changePin(currentUser)
         input("Return to continue...")
+        showMenu(currentUser)
     elif(choice == 5):
         print("Exiting the application, goodbye...")
         sys.exit() 
 
-def deposit():
-    print("")
-
+def deposit(currentUser):
+    entered = 0
+    while entered == 0:
+        try:
+            depositAmount = int(input("How much would you like to deposit: "))
+        except ValueError:
+            print("You have enetered incorect ammount.")
+            continue
+        if depositAmount < 0:
+            print("Invalid amount entered!")
+            continue
+        entered = 1 
+        break
+    
+    for user in userList:
+        if user["userID"] == currentUser:
+            user["userBalance"] += depositAmount
+    print("\nDeposit was successful. You have deposited", depositAmount,"Euro.\n")
+    input("Return to continue...")
+    showMenu(currentUser)
   
-def withdraw():
-    print("")  
+def withdraw(currentUser):
+    entered = 0
+    while entered == 0:
+        try:
+            withdrawAmount = int(input("How much would you like to withdraw: "))
+        except ValueError:
+            print("You have entered incorrect amount.")
+            continue
+        if withdrawAmount < 0:
+            print("Invalid amount entered.")
+            continue
+        entered = 1
+        break
+    for user in userList:
+        if user["userID"] == currentUser:
+            user["userBalance"] -= withdrawAmount
+    print("\nWithdrawal was successfull. You have withdrawn", withdrawAmount, "Euro\n")
+    input("Return to continue...")
+    showMenu(currentUser)    
   
     
 def displayStatement(currentUser):
@@ -122,11 +164,11 @@ def displayStatement(currentUser):
     
     for user in userList:
         if user["userID"] == currentUser:
-            print(f"{user['userID'].ljust(20)} {user['userBalance'].ljust(20)} {str(user['overdraft'])}\n")
+            print(f"{user['userID'].ljust(20)} {str(user['userBalance']).ljust(20)} {str(user['overdraft'])}\n")
 
-def changePin():
+def changePin(currentUser):
     print("")  
-      
+    showMenu(currentUser) 
 
 def main():
     choice = loginOrRegister()
