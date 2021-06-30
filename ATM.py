@@ -9,7 +9,6 @@ userList.append({"userID": "00234", "userPin": "2345", "userBalance": 499 , "ove
 userList.append({"userID": "00345", "userPin": "3456", "userBalance": 25, "overdraft": True})
 
 
-
 def loginOrRegister():
     print("Please select from the following:")
     print("1. Login")
@@ -35,10 +34,11 @@ def login():
           userFound = True
           if user["userPin"] != userPin:
               print ("Pin for user", userId, "is incorrect, please try again...")
-              login()
+              login()       
           else:
-              print("Login Successful!")
+              print("\nLogin Successful!\n")
               currentUser = user["userID"]
+              input("Return to continue...")
               showMenu(currentUser)
     if not userFound:
       print("User", userId, "not found on system.")
@@ -46,15 +46,21 @@ def login():
 
 
 def registerUser():
-    
-    print("Please input User ID and User Pin to register.")
-    userId = input("User ID: ") 
-    for user in userList:
-        if user["userID"] == userId:
-            print("User ID already exists. Please use a different one \n")   
-      
-    userPin = input("User Pin: ")
-    userList.append({'userID': userId, 'userPin': userPin, 'userBalance': 0})
+    validUserIdEntered = False
+    while not validUserIdEntered:
+        print("Please input User ID and User Pin to register.")
+        userId = input("User ID: ")
+        invalidNameEntered = False
+        for user in userList:
+            if user["userID"] == userId:
+                print("User ID already exists. Please use a different one \n")
+                invalidNameEntered = True
+        if invalidNameEntered:
+            continue
+        else:
+            validUserIdEntered = True
+            userPin = input("User Pin: ")
+            userList.append({'userID': userId, 'userPin': userPin, 'userBalance': 0})
     
     print("Registration Succesful! Please login into your account.\n")
     input("Return to continue...")
@@ -113,6 +119,7 @@ def menuSelection(choice, currentUser):
     elif(choice == 5):
         print("Exiting the application, goodbye...")
         sys.exit() 
+        
 
 def deposit(currentUser):
     entered = 0
@@ -120,9 +127,9 @@ def deposit(currentUser):
         try:
             depositAmount = int(input("How much would you like to deposit: "))
         except ValueError:
-            print("You have enetered incorect ammount.")
+            print("You have enetered an invalid amount.")
             continue
-        if depositAmount < 0:
+        if depositAmount <= 0:
             print("Invalid amount entered!")
             continue
         entered = 1 
@@ -134,28 +141,31 @@ def deposit(currentUser):
     print("\nDeposit was successful. You have deposited", depositAmount,"Euro.\n")
     input("Return to continue...")
     showMenu(currentUser)
-  
+    
+
 def withdraw(currentUser):
     entered = 0
     while entered == 0:
         try:
             withdrawAmount = int(input("How much would you like to withdraw: "))
+            entered = 1
         except ValueError:
-            print("You have entered incorrect amount.")
+            print("You have entered invalid amount. Please try again.")
             continue
-        if withdrawAmount < 0:
-            print("Invalid amount entered.")
+        if withdrawAmount <= 9:
+            print("Amount you want to withdraw has to be at least 10 Euro .")
             continue
-        entered = 1
-        break
-    for user in userList:
-        if user["userID"] == currentUser:
-            user["userBalance"] -= withdrawAmount
-    print("\nWithdrawal was successfull. You have withdrawn", withdrawAmount, "Euro\n")
+        for user in userList: 
+            if user["userID"] == currentUser:
+                if withdrawAmount > user["userBalance"]:
+                    print("You have insuficient funds.")          
+                else:    
+                    user["userBalance"] -= withdrawAmount
+                    print("\nWithdrawal was successfull. You have withdrawn", withdrawAmount, "Euro\n")
     input("Return to continue...")
     showMenu(currentUser)    
   
-    
+  
 def displayStatement(currentUser):
     print("Statement:")
     print("============================================================")
@@ -166,10 +176,34 @@ def displayStatement(currentUser):
         if user["userID"] == currentUser:
             print(f"{user['userID'].ljust(20)} {str(user['userBalance']).ljust(20)} {str(user['overdraft'])}\n")
 
-def changePin(currentUser):
-    print("")  
-    showMenu(currentUser) 
 
+def changePin(currentUser): 
+    entered = 0
+    while entered == 0:
+        try:
+            currentPinSelection = input("Enter your current PIN code: ")
+        except ValueError:
+            print("Your entered PIN code is incorrect.")
+            continue
+        for user in userList:
+            if user["userID"] == currentUser:
+                if user["userPin"] != currentPinSelection:
+                    print("Your entered PIN code is incorrect.")
+        while True:
+            try:
+                newPinSelection = input("Enter your new PIN code: ")
+            except ValueError:
+                print("Your entered PIN code is incorrect.")
+                continue
+            break
+        entered = 1
+        break
+    user["userPin"] = newPinSelection
+    print("\nPIN was changed successfully.\n") 
+    input("Return to continue...") 
+    showMenu(currentUser) 
+    
+    
 def main():
     choice = loginOrRegister()
     if choice == 1:
